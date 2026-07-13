@@ -52,7 +52,7 @@ function Sidebar({ isOpen, onClose }) {
                 <NavLink
                   key={link.to}
                   to={link.to}
-                  end={link.to === '/'}
+                  end={link.to === '/' || link.to === '/students'}
                   className={({ isActive }) =>
                     `sidebar-link ${isActive ? 'active' : ''}`
                   }
