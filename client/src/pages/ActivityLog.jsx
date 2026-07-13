@@ -29,11 +29,12 @@ function ActivityLog() {
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [actionFilter, setActionFilter] = useState('');
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.getActivityLogs({ page, limit: 15 });
+      const data = await api.getActivityLogs({ page, limit: 15, action: actionFilter });
       setLogs(data.data);
       setPagination(data.pagination);
     } catch {
@@ -41,7 +42,7 @@ function ActivityLog() {
     } finally {
       setLoading(false);
     }
-  }, [page, toast]);
+  }, [page, actionFilter, toast]);
 
   useEffect(() => {
     fetchLogs();
@@ -177,6 +178,20 @@ function ActivityLog() {
       title="Activity Log"
       description="Track all system actions and modifications."
     >
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
+        <select 
+          className="form-select" 
+          value={actionFilter} 
+          onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
+          style={{ width: '200px' }}
+        >
+          <option value="">All Actions</option>
+          <option value="CREATE">Create</option>
+          <option value="UPDATE">Update</option>
+          <option value="DELETE">Delete</option>
+        </select>
+      </div>
+
       {loading ? (
         <div className="glass" style={{ padding: 'var(--space-6)', borderRadius: 'var(--radius-xl)' }}>
           {Array.from({ length: 5 }).map((_, i) => (
