@@ -11,6 +11,12 @@ A full-stack web application built for managing student records, featuring a cus
 - Activity Log: Complete audit trail tracking all creations, updates, and deletions.
 - Modern UI: Custom CSS design system featuring glassmorphism, responsive layouts, and skeleton loaders.
 
+### Enterprise Backend & Security Features
+- **Concurrency & Race Condition Handling**: Implemented a robust 3-attempt automated retry loop in the backend. If two administrators try to create a student at the exact same millisecond causing an `Admission Number` collision, the system gracefully catches the database constraint error, generates the next available number, and successfully saves the student without showing errors to the user.
+- **DDoS Protection**: Enforced strict Rate Limiting (100 requests per 15 minutes) on API routes to protect the database and Cloudinary APIs from brute-force bot attacks.
+- **Data Integrity**: Enforced strict `@unique` database constraints at the PostgreSQL level for Email, Mobile, and Admission Number fields.
+- **Server Hardening**: Integrated `helmet` to mask Express server fingerprints and enforce 14 standard HTTP security headers (XSS, MIME-sniffing, and clickjacking protection). Implemented strict JSON payload size limits (1MB) to prevent Out-Of-Memory (OOM) crash attacks.
+
 ## Tech Stack
 
 - Frontend: React, Vite, React Router DOM, React Icons
