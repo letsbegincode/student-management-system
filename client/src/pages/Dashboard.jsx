@@ -91,12 +91,13 @@ function Dashboard() {
   const courses = stats?.byCourse?.length || 0;
   const courseData = stats?.byCourse || [];
   const yearData = stats?.byYear || [];
+  const genderData = stats?.byGender || [];
   
-  const maxCourseCount = Math.max(...courseData.map((c) => c.count), 1);
+  const lastActivityAction = recentActivity.length > 0 ? recentActivity[0].action : '--';
 
   // Year Donut Chart Calculations
-  let conicSegments = '';
-  let cumulativePercent = 0;
+  let yearConicSegments = '';
+  let cumulativeYearPercent = 0;
   
   const YEAR_COLORS = {
     1: '#6366f1',
@@ -107,36 +108,59 @@ function Dashboard() {
   };
 
   if (total > 0 && yearData.length > 0) {
-    conicSegments = yearData
+    yearConicSegments = yearData
       .map((y) => {
         const percent = (y.count / total) * 100;
         const color = YEAR_COLORS[y.year] || '#64748b';
-        const segment = `${color} ${cumulativePercent}% ${cumulativePercent + percent}%`;
-        cumulativePercent += percent;
+        const segment = `${color} ${cumulativeYearPercent}% ${cumulativeYearPercent + percent}%`;
+        cumulativeYearPercent += percent;
         return segment;
       })
       .join(', ');
   }
-  if (!conicSegments) conicSegments = 'var(--bg-input) 0% 100%';
+  if (!yearConicSegments) yearConicSegments = 'var(--bg-input) 0% 100%';
+
+  // Gender Donut Chart Calculations
+  let genderConicSegments = '';
+  let cumulativeGenderPercent = 0;
+  
+  if (total > 0 && genderData.length > 0) {
+    genderConicSegments = genderData
+      .map((g) => {
+        const percent = (g.count / total) * 100;
+        const color = GENDER_COLORS[g.gender] || '#64748b';
+        const segment = `${color} ${cumulativeGenderPercent}% ${cumulativeGenderPercent + percent}%`;
+        cumulativeGenderPercent += percent;
+        return segment;
+      })
+      .join(', ');
+  }
+  if (!genderConicSegments) genderConicSegments = 'var(--bg-input) 0% 100%';
 
   return (
     <PageWrapper title="Dashboard" description="Overview of your student data">
       {/* Stat Cards */}
       <div className="stats-grid">
-        <div className="stat-card glass animate-fade-in-up stagger-1">
+        <Link to="/students" className="stat-card glass animate-fade-in-up stagger-1" style={{ textDecoration: 'none' }}>
           <div className="stat-card-icon purple"><HiOutlineUserGroup /></div>
           <div className="stat-card-value">{total}</div>
           <div className="stat-card-label">Total Students</div>
-        </div>
-        <div className="stat-card glass animate-fade-in-up stagger-2">
+        </Link>
+        <div 
+          className="stat-card glass animate-fade-in-up stagger-2" 
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            document.getElementById('courses-section')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        >
           <div className="stat-card-icon green"><HiOutlineAcademicCap /></div>
           <div className="stat-card-value">{courses}</div>
           <div className="stat-card-label">Active Courses</div>
         </div>
         <div className="stat-card glass animate-fade-in-up stagger-3">
           <div className="stat-card-icon orange"><HiOutlineUserAdd /></div>
-          <div className="stat-card-value">{recentActivity.length}</div>
-          <div className="stat-card-label">Recent Actions</div>
+          <div className="stat-card-value" style={{ fontSize: 'var(--font-xl)' }}>{lastActivityAction}</div>
+          <div className="stat-card-label">Last Activity</div>
         </div>
         <div className="stat-card glass animate-fade-in-up stagger-4">
           <div className="stat-card-icon blue"><HiOutlineClipboardList /></div>
@@ -158,22 +182,31 @@ function Dashboard() {
         </div>
       ) : (
         <div className="dashboard-grid">
-          {/* Course Distribution */}
+          {/* Gender Distribution */}
           <div className="dashboard-section glass animate-fade-in-up stagger-3">
-            <h3 className="dashboard-section-title">📊 Students by Course</h3>
-            <div className="bar-chart">
-              {courseData.map((c) => (
-                <div key={c.course} className="bar-chart-item">
-                  <span className="bar-chart-label" title={c.course}>{c.course}</span>
-                  <div className="bar-chart-track">
-                    <div
-                      className="bar-chart-fill"
-                      style={{ width: `${(c.count / maxCourseCount) * 100}%` }}
-                    />
-                  </div>
-                  <span className="bar-chart-count">{c.count}</span>
+            <h3 className="dashboard-section-title">👥 Gender Distribution</h3>
+            <div className="donut-chart-wrapper">
+              <div
+                className="donut-chart"
+                style={{ background: `conic-gradient(${genderConicSegments})` }}
+              >
+                <div className="donut-chart-center">
+                  <span className="donut-chart-total">{total}</span>
+                  <span className="donut-chart-total-label">Total</span>
                 </div>
-              ))}
+              </div>
+              <div className="donut-legend">
+                {genderData.map((g) => (
+                  <div key={g.gender} className="donut-legend-item">
+                    <span
+                      className="donut-legend-color"
+                      style={{ background: GENDER_COLORS[g.gender] || '#64748b' }}
+                    />
+                    <span>{g.gender}</span>
+                    <span className="donut-legend-value">{g.count}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -183,7 +216,7 @@ function Dashboard() {
             <div className="donut-chart-wrapper">
               <div
                 className="donut-chart"
-                style={{ background: `conic-gradient(${conicSegments})` }}
+                style={{ background: `conic-gradient(${yearConicSegments})` }}
               >
                 <div className="donut-chart-center">
                   <span className="donut-chart-total">{total}</span>
@@ -205,11 +238,24 @@ function Dashboard() {
             </div>
           </div>
 
+          {/* Course Distribution Grid */}
+          <div id="courses-section" className="dashboard-section glass animate-fade-in-up stagger-5" style={{ gridColumn: '1 / -1' }}>
+            <h3 className="dashboard-section-title">📊 Students by Course</h3>
+            <div className="course-grid">
+              {courseData.map((c) => (
+                <div key={c.course} className="course-card">
+                  <span className="course-card-name">{c.course}</span>
+                  <span className="course-card-count">{c.count} Students</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Recent System Activity */}
-          <div className="dashboard-section glass animate-fade-in-up stagger-5" style={{ gridColumn: '1 / -1' }}>
+          <div className="dashboard-section glass animate-fade-in-up stagger-6" style={{ gridColumn: '1 / -1' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-5)' }}>
               <h3 className="dashboard-section-title" style={{ marginBottom: 0 }}>🕐 Recent System Activity</h3>
-              <Link to="/activity" className="btn btn-ghost btn-sm" style={{ padding: '0.25rem 0.75rem', fontSize: 'var(--font-xs)' }}>View All</Link>
+              <Link to="/activity-logs" className="btn btn-ghost btn-sm" style={{ padding: '0.25rem 0.75rem', fontSize: 'var(--font-xs)' }}>View All</Link>
             </div>
             <div className="recent-list">
               {recentActivity.length === 0 ? (

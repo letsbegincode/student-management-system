@@ -154,7 +154,7 @@ function StudentForm({ studentId = null }) {
             type="text"
             name="name"
             className={`form-input ${errors.name ? 'error' : ''}`}
-            placeholder="e.g. Abhinav Sharma"
+            placeholder="e.g. Abhinav Ranjan"
             value={form.name}
             onChange={handleChange}
           />
