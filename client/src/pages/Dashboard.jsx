@@ -5,6 +5,9 @@ import {
   HiOutlineAcademicCap,
   HiOutlineUserAdd,
   HiOutlineClipboardList,
+  HiOutlinePlusCircle,
+  HiOutlinePencilAlt,
+  HiOutlineTrash,
 } from 'react-icons/hi';
 import PageWrapper from '../components/Layout/PageWrapper';
 import api from '../services/api';
@@ -32,15 +35,29 @@ function timeAgo(dateStr) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
+const getActionIcon = (action) => {
+  switch (action) {
+    case 'CREATE': return <div className="action-icon icon-create" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}><HiOutlinePlusCircle size={20} /></div>;
+    case 'UPDATE': return <div className="action-icon icon-update" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.15)', color: '#6366f1' }}><HiOutlinePencilAlt size={20} /></div>;
+    case 'DELETE': return <div className="action-icon icon-delete" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}><HiOutlineTrash size={20} /></div>;
+    default: return null;
+  }
+};
+
 function Dashboard() {
   const [stats, setStats] = useState(null);
+  const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const data = await api.getStudentStats();
-        setStats(data.data);
+        const [statsRes, activityRes] = await Promise.all([
+          api.getStudentStats(),
+          api.getActivityLogs({ limit: 5 })
+        ]);
+        setStats(statsRes.data);
+        setRecentActivity(activityRes.data || []);
       } catch {
         // Stats will show empty state
       } finally {
@@ -71,22 +88,34 @@ function Dashboard() {
   }
 
   const total = stats?.total || 0;
-  const courses = stats?.byCourse?.length || 0;
-  const genderData = stats?.byGender || [];
   const courseData = stats?.byCourse || [];
-  const recentStudents = stats?.recentStudents || [];
+  const yearData = stats?.byYear || [];
+  
   const maxCourseCount = Math.max(...courseData.map((c) => c.count), 1);
 
-  // Build conic-gradient for donut chart
+  // Year Donut Chart Calculations
   let conicSegments = '';
-  let accumulated = 0;
-  genderData.forEach((g, i) => {
-    const pct = total > 0 ? (g.count / total) * 100 : 0;
-    const color = GENDER_COLORS[g.gender] || '#64748b';
-    conicSegments += `${color} ${accumulated}% ${accumulated + pct}%`;
-    accumulated += pct;
-    if (i < genderData.length - 1) conicSegments += ', ';
-  });
+  let cumulativePercent = 0;
+  
+  const YEAR_COLORS = {
+    1: '#6366f1',
+    2: '#ec4899',
+    3: '#f59e0b',
+    4: '#10b981',
+    5: '#8b5cf6',
+  };
+
+  if (total > 0 && yearData.length > 0) {
+    conicSegments = yearData
+      .map((y) => {
+        const percent = (y.count / total) * 100;
+        const color = YEAR_COLORS[y.year] || '#64748b';
+        const segment = `${color} ${cumulativePercent}% ${cumulativePercent + percent}%`;
+        cumulativePercent += percent;
+        return segment;
+      })
+      .join(', ');
+  }
   if (!conicSegments) conicSegments = 'var(--bg-input) 0% 100%';
 
   return (
@@ -105,13 +134,13 @@ function Dashboard() {
         </div>
         <div className="stat-card glass animate-fade-in-up stagger-3">
           <div className="stat-card-icon orange"><HiOutlineUserAdd /></div>
-          <div className="stat-card-value">{recentStudents.length}</div>
-          <div className="stat-card-label">Recent Additions</div>
+          <div className="stat-card-value">{recentActivity.length}</div>
+          <div className="stat-card-label">Recent Actions</div>
         </div>
         <div className="stat-card glass animate-fade-in-up stagger-4">
           <div className="stat-card-icon blue"><HiOutlineClipboardList /></div>
-          <div className="stat-card-value">{genderData.length}</div>
-          <div className="stat-card-label">Gender Categories</div>
+          <div className="stat-card-value">{yearData.length}</div>
+          <div className="stat-card-label">Year Cohorts</div>
         </div>
       </div>
 
@@ -147,9 +176,9 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Gender Distribution */}
+          {/* Students by Year Distribution */}
           <div className="dashboard-section glass animate-fade-in-up stagger-4">
-            <h3 className="dashboard-section-title">👥 Gender Distribution</h3>
+            <h3 className="dashboard-section-title">🎓 Students by Year</h3>
             <div className="donut-chart-wrapper">
               <div
                 className="donut-chart"
@@ -161,38 +190,44 @@ function Dashboard() {
                 </div>
               </div>
               <div className="donut-legend">
-                {genderData.map((g) => (
-                  <div key={g.gender} className="donut-legend-item">
+                {yearData.map((y) => (
+                  <div key={y.year} className="donut-legend-item">
                     <span
                       className="donut-legend-color"
-                      style={{ background: GENDER_COLORS[g.gender] || '#64748b' }}
+                      style={{ background: YEAR_COLORS[y.year] || '#64748b' }}
                     />
-                    <span>{g.gender}</span>
-                    <span className="donut-legend-value">{g.count}</span>
+                    <span>Year {y.year}</span>
+                    <span className="donut-legend-value">{y.count}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Recent Students */}
+          {/* Recent System Activity */}
           <div className="dashboard-section glass animate-fade-in-up stagger-5" style={{ gridColumn: '1 / -1' }}>
-            <h3 className="dashboard-section-title">🕐 Recently Added</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-5)' }}>
+              <h3 className="dashboard-section-title" style={{ marginBottom: 0 }}>🕐 Recent System Activity</h3>
+              <Link to="/activity" className="btn btn-ghost btn-sm" style={{ padding: '0.25rem 0.75rem', fontSize: 'var(--font-xs)' }}>View All</Link>
+            </div>
             <div className="recent-list">
-              {recentStudents.map((s) => (
-                <Link to={`/students/${s.id}`} key={s.id} className="recent-item">
-                  {s.photoUrl ? (
-                    <img src={s.photoUrl} alt={s.name} className="recent-item-avatar" />
-                  ) : (
-                    <div className="recent-item-avatar-placeholder">{getInitials(s.name)}</div>
-                  )}
-                  <div className="recent-item-info">
-                    <div className="recent-item-name">{s.name}</div>
-                    <div className="recent-item-detail">{s.admissionNo} · {s.course}</div>
+              {recentActivity.length === 0 ? (
+                <div style={{ padding: 'var(--space-4)', textAlign: 'center', color: 'var(--text-secondary)' }}>No recent activity.</div>
+              ) : (
+                recentActivity.map((log) => (
+                  <div key={log.id} className="recent-item" style={{ cursor: 'default' }}>
+                    {getActionIcon(log.action)}
+                    <div className="recent-item-info">
+                      <div className="recent-item-name">
+                        <span style={{ fontWeight: 700, color: 'var(--text-heading)', marginRight: '4px' }}>{log.action}</span>
+                        student record
+                      </div>
+                      <div className="recent-item-detail">Student: {log.studentName}</div>
+                    </div>
+                    <span className="recent-item-time">{timeAgo(log.createdAt)}</span>
                   </div>
-                  <span className="recent-item-time">{timeAgo(s.createdAt)}</span>
-                </Link>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
