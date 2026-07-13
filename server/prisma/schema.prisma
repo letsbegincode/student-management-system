@@ -15,7 +15,7 @@ model Student {
   admissionNo   String   @unique
   name          String
   email         String   @unique
-  mobile        String
+  mobile        String   @unique
   gender        String
   dob           DateTime
   course        String

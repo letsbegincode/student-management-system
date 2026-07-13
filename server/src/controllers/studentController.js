@@ -136,9 +136,8 @@ const getStudent = async (req, res, next) => {
 const createStudent = async (req, res, next) => {
   try {
     const data = req.validatedBody;
-    const admissionNo = await generateAdmissionNumber();
-
-    // Handle photo upload via Cloudinary (backend-only)
+    
+    // Handle photo upload via Cloudinary BEFORE the loop so we don't upload multiple times
     let photoUrl = null;
     let photoPublicId = null;
     if (req.file) {
@@ -147,36 +146,65 @@ const createStudent = async (req, res, next) => {
       photoPublicId = result.publicId;
     }
 
-    const student = await prisma.student.create({
-      data: {
-        ...data,
-        dob: new Date(data.dob),
-        admissionNo,
-        photoUrl,
-        photoPublicId,
-      },
-    });
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
 
-    // Log activity
-    await logActivity('CREATE', student.id, student.name, {
-      admissionNo: student.admissionNo,
-      course: student.course,
-    });
+    while (retryCount < MAX_RETRIES) {
+      try {
+        const admissionNo = await generateAdmissionNumber();
 
-    res.status(201).json({
-      success: true,
-      message: 'Student created successfully',
-      data: student,
-    });
-  } catch (error) {
-    // Handle unique constraint violation
-    if (error.code === 'P2002') {
-      const field = error.meta?.target?.[0] || 'field';
-      return res.status(409).json({
-        success: false,
-        message: `A student with this ${field} already exists`,
-      });
+        const student = await prisma.student.create({
+          data: {
+            ...data,
+            dob: new Date(data.dob),
+            admissionNo,
+            photoUrl,
+            photoPublicId,
+          },
+        });
+
+        // Log activity
+        await logActivity('CREATE', student.id, student.name, {
+          admissionNo: student.admissionNo,
+          course: student.course,
+        });
+
+        return res.status(201).json({
+          success: true,
+          message: 'Student created successfully',
+          data: student,
+        });
+      } catch (error) {
+        // Handle unique constraint violation
+        if (error.code === 'P2002') {
+          const field = error.meta?.target?.[0] || 'field';
+          
+          // If collision is admissionNo race condition, silently retry
+          if (field === 'admissionNo') {
+            retryCount++;
+            console.warn(`AdmissionNo collision detected! Retrying... (Attempt ${retryCount}/${MAX_RETRIES})`);
+            
+            if (retryCount >= MAX_RETRIES) {
+              return res.status(500).json({ 
+                success: false, 
+                message: 'System is too busy. Failed to generate a unique admission number. Please try again.' 
+              });
+            }
+            continue; // Spin the loop again to fetch the next highest number
+          }
+          
+          // If collision is email or mobile (user-error), reject instantly
+          return res.status(409).json({
+            success: false,
+            message: `A student with this ${field} already exists`,
+          });
+        }
+        
+        // If it's a completely different error, throw it to the outer catch block
+        throw error;
+      }
     }
+  } catch (error) {
     next(error);
   }
 };
