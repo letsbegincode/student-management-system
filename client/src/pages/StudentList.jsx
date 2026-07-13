@@ -198,7 +198,7 @@ function StudentList() {
             <option value="Female">Female</option>
             <option value="Other">Other</option>
           </select>
-          <select className="form-select" value={`${sortBy === 'name' ? 'name' : sortBy === 'createdAt' ? (order === 'desc' ? 'newest' : 'oldest') : 'newest'}-${order}`} onChange={handleSortChange}>
+          <select className="form-select" value={sortBy === 'name' ? `name-${order}` : (order === 'desc' ? 'newest' : 'oldest')} onChange={handleSortChange}>
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="name-asc">Name A → Z</option>

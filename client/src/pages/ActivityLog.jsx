@@ -120,15 +120,26 @@ function ActivityLog() {
   };
 
   const formatChanges = (changes) => {
-    if (!changes || Object.keys(changes).length === 0) return null;
+    if (!changes) return null;
+    
+    let parsedChanges = changes;
+    if (typeof changes === 'string') {
+      try {
+        parsedChanges = JSON.parse(changes);
+      } catch (e) {
+        return null;
+      }
+    }
+    
+    if (Object.keys(parsedChanges).length === 0) return null;
     
     // Check if it's a creation payload (no from/to)
-    const isCreation = !Object.values(changes).some(c => c && typeof c === 'object' && 'to' in c);
+    const isCreation = !Object.values(parsedChanges).some(c => c && typeof c === 'object' && 'to' in c);
     
     if (isCreation) {
       return (
         <div className="log-details-grid">
-          {Object.entries(changes).map(([key, val]) => (
+          {Object.entries(parsedChanges).map(([key, val]) => (
             <div key={key} className="log-detail-badge">
               <span className="log-detail-key">{key}:</span> {String(val)}
             </div>
@@ -140,7 +151,7 @@ function ActivityLog() {
     // It's an update with from/to
     return (
       <div className="log-changes-list">
-        {Object.entries(changes).map(([key, diff]) => {
+        {Object.entries(parsedChanges).map(([key, diff]) => {
           if (diff === 'Updated') {
             return (
               <div key={key} className="log-change-item">
