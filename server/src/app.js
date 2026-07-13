@@ -13,8 +13,9 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Routes will be added in Phase 2
-// app.use('/api/students', require('./routes/studentRoutes'));
+// Routes
+app.use('/api/students', require('./routes/studentRoutes'));
+app.use('/api/activity-logs', require('./routes/activityLogRoutes'));
 
 // Error handler
 app.use(errorHandler);
