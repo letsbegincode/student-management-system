@@ -20,7 +20,7 @@ function App() {
             <Route path="students/add" element={<AddStudent />} />
             <Route path="students/:id" element={<StudentDetail />} />
             <Route path="students/:id/edit" element={<EditStudent />} />
-            <Route path="activity-log" element={<ActivityLog />} />
+            <Route path="activity-logs" element={<ActivityLog />} />
           </Route>
         </Routes>
       </BrowserRouter>

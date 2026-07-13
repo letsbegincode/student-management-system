@@ -5,7 +5,7 @@ const pageTitles = {
   '/': { title: 'Dashboard', subtitle: 'Overview of your student data' },
   '/students': { title: 'Students', subtitle: 'Manage all student records' },
   '/students/add': { title: 'Add Student', subtitle: 'Register a new student' },
-  '/activity-log': { title: 'Activity Log', subtitle: 'Track all system actions' },
+  '/activity-logs': { title: 'Activity Log', subtitle: 'Track all system actions' },
 };
 
 function Header({ onMenuClick }) {

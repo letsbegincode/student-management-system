@@ -23,7 +23,7 @@ const navItems = [
   {
     section: 'System',
     links: [
-      { to: '/activity-log', label: 'Activity Log', icon: HiOutlineClipboardList },
+      { to: '/activity-logs', label: 'Activity Log', icon: HiOutlineClipboardList },
     ],
   },
 ];
