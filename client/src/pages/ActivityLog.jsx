@@ -30,11 +30,13 @@ function ActivityLog() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [actionFilter, setActionFilter] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.getActivityLogs({ page, limit: 15, action: actionFilter });
+      const data = await api.getActivityLogs({ page, limit: 15, action: actionFilter, startDate, endDate });
       setLogs(data.data);
       setPagination(data.pagination);
     } catch {
@@ -42,7 +44,7 @@ function ActivityLog() {
     } finally {
       setLoading(false);
     }
-  }, [page, actionFilter, toast]);
+  }, [page, actionFilter, startDate, endDate, toast]);
 
   useEffect(() => {
     fetchLogs();
@@ -178,18 +180,53 @@ function ActivityLog() {
       title="Activity Log"
       description="Track all system actions and modifications."
     >
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
-        <select 
-          className="form-select" 
-          value={actionFilter} 
-          onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
-          style={{ width: '200px' }}
-        >
-          <option value="">All Actions</option>
-          <option value="CREATE">Create</option>
-          <option value="UPDATE">Update</option>
-          <option value="DELETE">Delete</option>
-        </select>
+      <div className="list-toolbar glass" style={{ marginBottom: 'var(--space-6)', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-4)', alignItems: 'center' }}>
+          <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Filter Logs:</div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+            <span style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>From</span>
+            <input 
+              type="date" 
+              className="form-input" 
+              value={startDate} 
+              onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+              style={{ width: 'auto', padding: '0.4rem 0.75rem' }}
+            />
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+            <span style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>To</span>
+            <input 
+              type="date" 
+              className="form-input" 
+              value={endDate} 
+              onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+              style={{ width: 'auto', padding: '0.4rem 0.75rem' }}
+            />
+          </div>
+          
+          <select 
+            className="form-select" 
+            value={actionFilter} 
+            onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
+            style={{ width: '150px' }}
+          >
+            <option value="">All Actions</option>
+            <option value="CREATE">Create</option>
+            <option value="UPDATE">Update</option>
+            <option value="DELETE">Delete</option>
+          </select>
+
+          {(startDate || endDate || actionFilter) && (
+            <button 
+              className="btn btn-ghost btn-sm" 
+              onClick={() => { setStartDate(''); setEndDate(''); setActionFilter(''); setPage(1); }}
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {loading ? (
