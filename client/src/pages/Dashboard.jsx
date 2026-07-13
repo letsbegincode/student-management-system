@@ -88,6 +88,7 @@ function Dashboard() {
   }
 
   const total = stats?.total || 0;
+  const courses = stats?.byCourse?.length || 0;
   const courseData = stats?.byCourse || [];
   const yearData = stats?.byYear || [];
   
