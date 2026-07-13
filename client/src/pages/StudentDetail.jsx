@@ -15,6 +15,7 @@ import {
 import PageWrapper from '../components/Layout/PageWrapper';
 import { useToast } from '../context/ToastContext';
 import api from '../services/api';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 function getInitials(name) {
   return name
@@ -108,7 +109,7 @@ function StudentDetail() {
         <div className="profile-sidebar glass">
           <div className="profile-avatar-container">
             {student.photoUrl ? (
-              <img src={student.photoUrl} alt={student.name} className="profile-avatar" />
+              <img src={getOptimizedImageUrl(student.photoUrl, 240, 240)} alt={student.name} className="profile-avatar" />
             ) : (
               <div className="profile-avatar-placeholder">
                 {getInitials(student.name)}

@@ -14,6 +14,7 @@ import {
 import PageWrapper from '../components/Layout/PageWrapper';
 import { useToast } from '../context/ToastContext';
 import api from '../services/api';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 function getInitials(name) {
   return name
@@ -258,7 +259,7 @@ function StudentList() {
               >
                 <div className="student-card-header">
                   {student.photoUrl ? (
-                    <img src={student.photoUrl} alt={student.name} className="student-card-avatar" />
+                    <img src={getOptimizedImageUrl(student.photoUrl, 80, 80)} alt={student.name} className="student-card-avatar" />
                   ) : (
                     <div className="student-card-avatar-placeholder">{getInitials(student.name)}</div>
                   )}
