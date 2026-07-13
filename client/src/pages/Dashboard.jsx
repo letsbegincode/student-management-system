@@ -172,7 +172,6 @@ function Dashboard() {
       {total === 0 ? (
         <div className="glass" style={{ borderRadius: 'var(--radius-xl)' }}>
           <div className="empty-state">
-            <div className="empty-state-icon">📚</div>
             <div className="empty-state-title">No students yet</div>
             <div className="empty-state-text">Start by adding your first student to see analytics and charts here.</div>
             <Link to="/students/add" className="btn btn-primary">
@@ -184,7 +183,7 @@ function Dashboard() {
         <div className="dashboard-grid">
           {/* Gender Distribution */}
           <div className="dashboard-section glass animate-fade-in-up stagger-3">
-            <h3 className="dashboard-section-title">👥 Gender Distribution</h3>
+            <h3 className="dashboard-section-title">Gender Distribution</h3>
             <div className="donut-chart-wrapper">
               <div
                 className="donut-chart"
@@ -212,7 +211,7 @@ function Dashboard() {
 
           {/* Students by Year Distribution */}
           <div className="dashboard-section glass animate-fade-in-up stagger-4">
-            <h3 className="dashboard-section-title">🎓 Students by Year</h3>
+            <h3 className="dashboard-section-title">Students by Year</h3>
             <div className="donut-chart-wrapper">
               <div
                 className="donut-chart"
@@ -240,7 +239,7 @@ function Dashboard() {
 
           {/* Course Distribution Grid */}
           <div id="courses-section" className="dashboard-section glass animate-fade-in-up stagger-5" style={{ gridColumn: '1 / -1' }}>
-            <h3 className="dashboard-section-title">📊 Students by Course</h3>
+            <h3 className="dashboard-section-title">Students by Course</h3>
             <div className="course-grid">
               {courseData.map((c) => (
                 <div key={c.course} className="course-card">
@@ -254,7 +253,7 @@ function Dashboard() {
           {/* Recent System Activity */}
           <div className="dashboard-section glass animate-fade-in-up stagger-6" style={{ gridColumn: '1 / -1' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-5)' }}>
-              <h3 className="dashboard-section-title" style={{ marginBottom: 0 }}>🕐 Recent System Activity</h3>
+              <h3 className="dashboard-section-title" style={{ marginBottom: 0 }}>Recent System Activity</h3>
               <Link to="/activity-logs" className="btn btn-ghost btn-sm" style={{ padding: '0.25rem 0.75rem', fontSize: 'var(--font-xs)' }}>View All</Link>
             </div>
             <div className="recent-list">

@@ -4,6 +4,7 @@ import {
   HiOutlineUserGroup,
   HiOutlineUserAdd,
   HiOutlineClipboardList,
+  HiOutlineAcademicCap
 } from 'react-icons/hi';
 
 const navItems = [
@@ -37,7 +38,7 @@ function Sidebar({ isOpen, onClose }) {
       />
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon">🎓</div>
+          <div className="sidebar-logo-icon"><HiOutlineAcademicCap /></div>
           <div>
             <div className="sidebar-logo-text">StudentHub</div>
           </div>
