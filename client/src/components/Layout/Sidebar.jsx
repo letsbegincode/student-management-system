@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   HiOutlineHome,
   HiOutlineUserGroup,
-  HiOutlineUserPlus,
+  HiOutlineUserAdd,
   HiOutlineClipboardList,
 } from 'react-icons/hi';
 
@@ -17,7 +17,7 @@ const navItems = [
     section: 'Students',
     links: [
       { to: '/students', label: 'Student List', icon: HiOutlineUserGroup },
-      { to: '/students/add', label: 'Add Student', icon: HiOutlineUserPlus },
+      { to: '/students/add', label: 'Add Student', icon: HiOutlineUserAdd },
     ],
   },
   {
