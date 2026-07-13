@@ -52,8 +52,7 @@ function ActivityLog() {
 
   // Generate pagination buttons
   const renderPagination = () => {
-    const { totalPages, page: currentPage } = pagination;
-    if (!totalPages || totalPages <= 1) return null;
+    const { totalPages = 1, page: currentPage = 1, total = 0 } = pagination;
 
     const pages = [];
     const maxVisible = 5;
@@ -94,7 +93,7 @@ function ActivityLog() {
         <button
           className="pagination-btn"
           disabled={!pagination.hasPrev}
-          onClick={() => setPage((p) => p - 1)}
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
         >
           ‹
         </button>
@@ -102,12 +101,12 @@ function ActivityLog() {
         <button
           className="pagination-btn"
           disabled={!pagination.hasNext}
-          onClick={() => setPage((p) => p + 1)}
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
         >
           ›
         </button>
         <span className="pagination-info">
-          {pagination.total} log{pagination.total !== 1 ? 's' : ''}
+          {total} log{total !== 1 ? 's' : ''}
         </span>
       </div>
     );
