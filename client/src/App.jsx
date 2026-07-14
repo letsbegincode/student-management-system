@@ -1,8 +1,15 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
 import { ToastProvider } from './context/ToastContext';
 import Layout from './components/Layout/Layout';
 import './App.css';
+
+// Resets scroll position to top on every route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const StudentList = lazy(() => import('./pages/StudentList'));
@@ -22,6 +29,7 @@ function App() {
   return (
     <ToastProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Layout />}>
