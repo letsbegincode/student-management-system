@@ -6,6 +6,9 @@ const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
+// Trust Vercel's reverse proxy so rate limiter reads the real client IP
+app.set('trust proxy', 1);
+
 // 1. Security Headers (Information Leakage Protection)
 app.use(helmet());
 
@@ -15,6 +18,7 @@ const apiLimiter = rateLimit({
   max: 100, // Limit each IP to 100 requests per 15 minutes
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false, xForwardedForHeader: false },
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again after 15 minutes',
